@@ -1,21 +1,17 @@
 use tokio;
 pub mod request;
-pub mod wordlists;
 use crate::request::external_request::fetch_data;
 use futures::stream::{FuturesUnordered, StreamExt};
 use std::fs::File;
 use std::io::{self, BufRead};
 use clap::Parser;
 
-/// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Name of the person to greet
     #[arg(short, long)]
     file: String,
 
-    /// Number of times to greet
     #[arg(short, long)]
     url: String,
 }
