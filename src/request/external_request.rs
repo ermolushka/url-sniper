@@ -8,7 +8,6 @@ pub struct ResponseData {
 
 // Asynchronously fetch data from a URL and return the text
 pub async fn fetch_data(url: String) -> Result<ResponseData, Error> {
-    println!("{}", url);
     let res = reqwest::get(url).await?;
     let res_length: u64 = match res.content_length() {
         Some(v) =>  v,
