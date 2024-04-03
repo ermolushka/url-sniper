@@ -28,7 +28,7 @@ async fn main() {
     let reader = BufReader::new(file);
 
     // Concurrency limit
-    let semaphore = Arc::new(Semaphore::new(50)); // Adjust the concurrency limit as needed
+    let semaphore = Arc::new(Semaphore::new(max_concurrent)); // Adjust the concurrency limit as needed
 
     let mut futures = FuturesUnordered::new();
     let mut lines = reader.lines();
