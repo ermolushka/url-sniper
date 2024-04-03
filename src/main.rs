@@ -12,6 +12,7 @@ use std::sync::Arc;
 struct Args {
     file: String,
     url: String,
+    max_concurrent: usize
 }
 
 #[tokio::main]
@@ -20,6 +21,7 @@ async fn main() {
 
     let file_path = args.file;
     let base_url = args.url;
+    let max_concurrent = args.max_concurrent;
     let file = File::open(file_path).await.expect("Failed to open file");
     let reader = BufReader::new(file);
 
@@ -39,7 +41,7 @@ async fn main() {
             result
         }));
 
-        if futures.len() >= 50 {
+        if futures.len() >= max_concurrent {
             if let Some(result) = futures.next().await {
                 // Process result
                 match result {
