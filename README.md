@@ -8,6 +8,7 @@
 - **URL Path Checking**: Scans for valid and accessible paths within a domain, aiding in uncovering hidden directories or files.
 - **Multi-threaded Processing**: Utilizes Rust's powerful concurrency features for fast and efficient scans.
 - **Custom Status Code Handling**: Allows users to specify which HTTP status codes should be considered during scans, enabling focused and customized investigations.
+- **Custom Response length Handling**: Allows users to specify which response lengths should be considered during scans, enabling focused and customized investigations.
 - **Input from File**: Enables batch processing of URLs and subdomains through input from a text file, streamlining the workflow for large-scale scans.
 
 ## Getting Started
@@ -33,17 +34,18 @@ This command compiles the project and generates an executable in the target/debu
 ### Usage
 To run url-sniper, use the following syntax:
 ```bash
-cargo run -- [input_file] [your_url] [concurrency_level] [target_status_code]
+cargo run -- [input_file] [your_url] [concurrency_level] [target_status_codes]
 ```
 - `input_file`: Path to a text file containing URLs or subdomains to check.
 - `your_url`: The base URL or domain you wish to investigate.
 - `concurrency_level`: How many threads url-sniper should use concurrently. Higher numbers increase speed but consume more system resources.
-- `target_status_code`: The HTTP status code url-sniper will look for. Common codes include 200 for success or 404 for not found.
+- `target_status_codes`: The HTTP status codes url-sniper will look for. Common codes include 200 for success or 404 for not found. Can be comma separated
+- `response_body_length`: The response body lengths url-sniper will look for. Can be comma separated
 ### Example
 ```bash
-cargo run -- test.txt yourdomain.com 50 404
+cargo run -- test.txt yourdomain.com 50 404,500 7548 
 ```
-This command checks URLs or subdomains listed in test.txt against yourdomain.com, using 50 threads, and looks for paths that return a 404 status code.
+This command checks URLs or subdomains listed in test.txt against yourdomain.com, using 50 threads, and ignores paths that return a 404,500 status codes or response body of length 7548.
 
 ### Contributing
 Contributions to url-sniper are welcome! Whether it's feature requests, bug reports, or code contributions, please feel free to make an issue or pull request on GitHub.

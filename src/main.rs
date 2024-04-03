@@ -13,7 +13,8 @@ struct Args {
     file: String,
     url: String,
     max_concurrent: usize,
-    response_code_filter: u16,
+    response_code_filter: String,
+    content_length_filter: String
 }
 
 #[tokio::main]
@@ -24,6 +25,7 @@ async fn main() {
     let base_url = args.url;
     let max_concurrent = args.max_concurrent;
     let response_code_filter = args.response_code_filter;
+    let content_length_filter: Vec<u64> = args.content_length_filter.split(",").filter_map(|s| s.parse().ok()).collect();
     let file = File::open(file_path).await.expect("Failed to open file");
     let reader = BufReader::new(file);
 
@@ -52,7 +54,7 @@ async fn main() {
                 // Process result
                 match result {
                     Ok(Ok(data)) => {
-                        if data.code.as_u16() != response_code_filter {
+                        if !response_code_filter.contains(data.code.as_str()) && !content_length_filter.contains(&data.length){
                             println!(
                                 "Received data: {:?}, url: {}",
                                 data,
