@@ -34,7 +34,7 @@ This command compiles the project and generates an executable in the target/debu
 ### Usage
 To run url-sniper, use the following syntax:
 ```bash
-cargo run -- [input_file] [your_url] [concurrency_level] [target_status_codes]
+cargo run -- [input_file] [your_url] [concurrency_level] [target_status_codes] [response_body_length]
 ```
 - `input_file`: Path to a text file containing URLs or subdomains to check.
 - `your_url`: The base URL or domain you wish to investigate.
