@@ -5,7 +5,7 @@ use std::fmt;
 pub struct ResponseData {
     pub code: StatusCode,
     pub length: u64,
-    pub url: reqwest::Url,
+    pub url: String,
 }
 
 impl fmt::Display for ResponseData {
@@ -15,7 +15,7 @@ impl fmt::Display for ResponseData {
             "(code: {}, response length: {}, path: {})",
             self.code,
             self.length,
-            self.url.path()
+            self.url
         )
     }
 }
@@ -31,7 +31,7 @@ pub async fn fetch_data(url: String) -> Result<ResponseData, Error> {
     let data: ResponseData = ResponseData {
         code: res.status(),
         length: res_length,
-        url: res.url().clone(),
+        url: url.clone(),
     };
     Ok(data)
 }
