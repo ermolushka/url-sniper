@@ -12,9 +12,12 @@ use tokio::sync::Semaphore;
 struct Args {
     file: String,
     url: String,
+    #[clap(long = "max-concurrent", short = 'm')]
     max_concurrent: usize,
-    response_code_filter: String,
-    content_length_filter: String
+    #[clap(long = "response-code", short = 'r')]
+    response_code_filter: Option<String>,
+    #[clap(long = "content-length-filter", short = 'c')]
+    content_length_filter: Option<String>,
 }
 
 #[tokio::main]
@@ -24,8 +27,14 @@ async fn main() {
     let file_path = args.file;
     let base_url = args.url;
     let max_concurrent = args.max_concurrent;
-    let response_code_filter = args.response_code_filter;
-    let content_length_filter: Vec<u64> = args.content_length_filter.split(",").filter_map(|s| s.parse().ok()).collect();
+    let response_code_filter: Vec<u16> = args
+        .response_code_filter
+        .map(|s| s.split(",").filter_map(|part| part.parse().ok()).collect())
+        .unwrap_or_else(Vec::new);
+    let content_length_filter: Vec<u64> = args
+        .content_length_filter
+        .map(|s| s.split(",").filter_map(|part| part.parse().ok()).collect())
+        .unwrap_or_else(Vec::new);
     let file = File::open(file_path).await.expect("Failed to open file");
     let reader = BufReader::new(file);
 
@@ -54,12 +63,14 @@ async fn main() {
                 // Process result
                 match result {
                     Ok(Ok(data)) => {
-                        if !response_code_filter.contains(data.code.as_str()) && !content_length_filter.contains(&data.length){
-                            println!(
-                                "Received data: {:?}, url: {}",
-                                data,
-                                format!("https://{}/{}", base_url, line)
-                            );
+                        if check_filters(
+                            &response_code_filter,
+                            &content_length_filter,
+                            &data.code.as_u16(),
+                            &data.length,
+                        ) {
+                            let res = format!("Received data: {data}");
+                            println!("{}", res);
                         }
                     }
                     Ok(Err(e)) => println!("Error fetching data: {}", e),
@@ -72,9 +83,33 @@ async fn main() {
     // Consume any remaining futures
     while let Some(result) = futures.next().await {
         match result {
-            Ok(Ok(data)) => println!("Received data: {:?}", data),
+            Ok(Ok(data)) => {
+                if check_filters(
+                    &response_code_filter,
+                    &content_length_filter,
+                    &data.code.as_u16(),
+                    &data.length,
+                ) {
+                    let res = format!("Received data: {data}");
+                    println!("{}", res);
+                }
+            }
             Ok(Err(e)) => println!("Error fetching data: {}", e),
             Err(e) => println!("Task failed: {:?}", e),
         }
     }
+}
+
+fn check_filters(
+    response_code_filter: &Vec<u16>,
+    content_length_filter: &Vec<u64>,
+    code: &u16,
+    length: &u64,
+) -> bool {
+    if (response_code_filter.len() > 0 && response_code_filter.contains(code))
+        || (content_length_filter.len() > 0 && content_length_filter.contains(length))
+    {
+        return false;
+    }
+    return true;
 }
